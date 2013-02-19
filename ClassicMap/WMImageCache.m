@@ -12,11 +12,12 @@
 
 @interface WMImageCache () {
     NSFileManager *fileManager;
-    NSString *cacheDirectory;
     
     NSCache *cache;
     NSOperationQueue *networkQueue;
 }
+
+@property (strong, nonatomic) NSString *cacheDirectory;
 
 @end
 
@@ -45,7 +46,7 @@
         fileManager = [[NSFileManager alloc] init];
         
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-        cacheDirectory = [[paths lastObject] stringByAppendingPathComponent:@"Images"];
+        self.cacheDirectory = [[paths lastObject] stringByAppendingPathComponent:@"Images"];
         
         [self createDirectories];
         
@@ -57,13 +58,13 @@
 - (void)createDirectories
 {
     BOOL isDirectory = NO;
-    BOOL exists = [fileManager fileExistsAtPath:cacheDirectory isDirectory:&isDirectory];
+    BOOL exists = [fileManager fileExistsAtPath:self.cacheDirectory isDirectory:&isDirectory];
     if (!exists || !isDirectory) {
-        [fileManager createDirectoryAtPath:cacheDirectory withIntermediateDirectories:YES attributes:nil error:nil];
+        [fileManager createDirectoryAtPath:self.cacheDirectory withIntermediateDirectories:YES attributes:nil error:nil];
     }
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
-            NSString *subDir = [NSString stringWithFormat:@"%@/%X%X", cacheDirectory, i, j];
+            NSString *subDir = [NSString stringWithFormat:@"%@/%X%X", self.cacheDirectory, i, j];
             BOOL isDir = NO;
             BOOL existsSubDir = [fileManager fileExistsAtPath:subDir isDirectory:&isDir];
             if (!existsSubDir || !isDir) {
@@ -160,16 +161,16 @@
 {
     [cache removeAllObjects];
     
-    if ([fileManager fileExistsAtPath:cacheDirectory]) {
-        if ([fileManager removeItemAtPath:cacheDirectory error:nil]) {
+    if ([fileManager fileExistsAtPath:self.cacheDirectory]) {
+        if ([fileManager removeItemAtPath:self.cacheDirectory error:nil]) {
             [self createDirectories];
         }
     }
     
     BOOL isDirectory = NO;
-    BOOL exists = [fileManager fileExistsAtPath:cacheDirectory isDirectory:&isDirectory];
+    BOOL exists = [fileManager fileExistsAtPath:self.cacheDirectory isDirectory:&isDirectory];
     if (!exists || !isDirectory) {
-        [fileManager createDirectoryAtPath:cacheDirectory withIntermediateDirectories:YES attributes:nil error:nil];
+        [fileManager createDirectoryAtPath:self.cacheDirectory withIntermediateDirectories:YES attributes:nil error:nil];
     }
 }
 
@@ -189,7 +190,7 @@
 
 - (NSString *)filePathForKey:(NSString *)key
 {
-    NSString *filePath = [NSString stringWithFormat:@"%@/%@/%@", cacheDirectory, [key substringToIndex:2], key];
+    NSString *filePath = [NSString stringWithFormat:@"%@/%@/%@", self.cacheDirectory, [key substringToIndex:2], key];
     return filePath;
 }
 
